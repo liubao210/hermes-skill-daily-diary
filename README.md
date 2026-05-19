@@ -14,6 +14,7 @@ Write entries via `#diary-start` / `#diary-end`, store as ISO-week-organised mar
 - **First-run wizard** — interactive setup via Hermes Agent
 - **Image support** — `images/` subdirectory with relative references
 - **Weather annotation** — optional, configurable default location
+- **Progressive disclosure** — core SKILL.md is lightweight (2.7 KB); detailed references load on demand
 
 ## Installation
 
@@ -21,36 +22,31 @@ Write entries via `#diary-start` / `#diary-end`, store as ISO-week-organised mar
 # Via Hermes Skills Hub (recommended)
 hermes skills install daily-diary
 
-# Or manual — copy to ~/.hermes/skills/
+# Or manual — copy to ~/.hermes/skills/productivity/
 cp -r daily-diary ~/.hermes/skills/productivity/
 ```
 
 ## First Run
 
 After installation, just say:
-
 > Set up my diary
 
-The agent will walk you through:
-
-1. **Storage directory** — default `~/Documents/Diary/`, or your Obsidian vault, or iCloud Drive
-2. **Reminder time** — e.g. `21:00` for a daily nudge (smart — skips if you already wrote)
-3. A cron job is created automatically
+The agent walks through storage directory, reminder time, and creates a cron job.
 
 ## Usage
 
 | Command | What it does |
 |---|---|
-| `#diary-start` | Begin recording an entry. Send text and images freely. |
+| `#diary-start` | Begin recording an entry. |
 | `#diary-end` | Stop recording. |
-| `#view-diary` | Read back today's or recent entries. |
+| `#view-diary` | Read back today's entries. |
 | "Change my diary settings" | Update path, time, or commands. |
 | "Remove diary" | Delete cron job and config (files stay on disk). |
 
-## Diary Format
+## Structure
 
 ```
-~/Documents/Diary/               # configurable
+~/Documents/Diary/
 ├── 2026-W21/
 │   ├── 2026-05-18.md
 │   └── images/
@@ -58,23 +54,20 @@ The agent will walk you through:
 │       └── 2026-05-18-002.jpg
 ```
 
-Entry format:
+## Progressive Loading
 
-```markdown
-# 2026-05-18 Monday
+This skill uses progressive disclosure to keep the agent's context lean:
 
-> ☀️ 21°C · Beijing
+| File | Size | When loaded |
+|---|---|---|
+| `SKILL.md` | ~2.7 KB | **Always** — core logic, flow, triggers |
+| `references/setup.md` | ~2.3 KB | First run setup wizard |
+| `references/reconfiguration.md` | ~1.2 KB | Changing settings after setup |
+| `references/format.md` | ~1.4 KB | Entry formatting details |
+| `references/cron-reminder.md` | ~0.9 KB | Reminder behaviour deep-dive |
+| `references/pitfalls.md` | ~1.7 KB | Common pitfalls + verification |
 
-## 08:34
-
-Today was a good day.
-
-## 20:15
-
-Watched a movie. Great ending.
-
-![Movie scene](images/2026-05-18-002.jpg)
-```
+The agent loads `SKILL.md` on every session. Reference files are loaded via `skill_view('daily-diary', file_path='references/...')` only when the relevant scenario arises.
 
 ## Requirements
 
